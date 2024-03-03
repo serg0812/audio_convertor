@@ -2,4 +2,4 @@ streamlit
 streamlit_mic_recorder
 openai
 langchain
-pydantic=1.10.12
+pydantic==1.10.12
