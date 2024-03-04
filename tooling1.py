@@ -20,17 +20,17 @@ class ClientDetails(BaseModel):
     """
     Pydantic arguments schema for person details
     """
-    name: str = Field(..., description="Name of the person")
-    age: str = Field(..., description="Age of the person")
-    location: str = Field(..., description="Place where the person is located")
+    name: str = Field(description="Name of the person")
+    age: str = Field(description="Age of the person")
+    location: str = Field(description="Place where the person is located")
 
 class CarDetails(BaseModel):
     """
     Pydantic arguments for car details
     """
-    oem: str = Field(..., description="car manufacturer name e.g. BMW, Mercedes")
-    model: str = Field(..., description="model details e.g. BMW 523")
-    year: str = Field(..., description="Year when the car was manufactured")
+    oem: str = Field(description="car manufacturer name e.g. BMW, Mercedes")
+    model: str = Field(description="model details e.g. BMW 523")
+    year: str = Field(description="Year when the car was manufactured")
 
 def get_client_details(name: str, age: str, location: str) -> str:
     response = ClientDetails(name=name, age=age, location=location)
