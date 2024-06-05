@@ -51,7 +51,9 @@ def process_text_from_streamlit(text_output: str) -> str:
     llm_with_tools = llm.bind(functions=[format_tool_to_openai_function(t) for t in tools])
 # in any of the prompt you have to specify that response should be in json!!! otherwise you will get an error
     system_init_prompt = "You are a doctor handling the records of your patient"
-    user_init_prompt = f"Record all details about the person, their syndroms and history of the desease and return them in json format: {text_output}" 
+    user_init_prompt = f"""Record all details about the person, their syndroms and history of the desease and return them in json format. 
+    Return only the data relevant to tools, skip the rest.
+    Here is your data: {text_output}""" 
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", system_init_prompt),
