@@ -2,14 +2,15 @@ import streamlit as st
 from openai import OpenAI
 from streamlit_mic_recorder import mic_recorder, speech_to_text
 import tooling1
+from process_images_from_array import *
 
 # Initialize OpenAI client
 client = OpenAI()
 
-st.header("Convert Audio to Text")
+st.header("Convert patient's details to text")
 
 # Option for users to either upload a file or record directly
-option = st.radio("Choose an option:", ('Upload Audio File', 'Record Audio'))
+option = st.radio("Choose an option:", ('Upload Audio File', 'Record Audio', 'Upload handwritten document'))
 
 if 'text_output' not in st.session_state:
     st.session_state['text_output'] = ''
@@ -22,6 +23,7 @@ def convert_voice_to_text(audio_file):
         response_format="text"
     )
     return transcript
+
 
 if option == 'Upload Audio File':
     audio_file = st.file_uploader("Upload an audio file", type=['m4a', 'wav', 'mp3', 'mp4'])
@@ -53,28 +55,16 @@ elif option == 'Record Audio':
                 # Display the processed output in Streamlit
                 st.text_area("Processed Output", value=processed_output, height=300)
 
-# Additional functionality (translation and text-to-speech conversion) remains the same
-if 'text_output' in st.session_state and st.session_state['text_output']:
-    language_input = st.text_input("Enter the language you would like to translate it to:", "")
+elif option == 'Upload handwritten document':
+    img_file = st.file_uploader("Upload your document", type=['png', 'jpg', 'jpeg', 'pdf'])
+    if img_file and st.button('Convert handwriting to Text'):
+        base64_image = encode_image_file(img_file)
+        raw_text_output = read_images(base64_image, text_prompt())  # Convert handwritten file to text
+        st.session_state['text_output'] = raw_text_output  # Store raw text output in session state for later use
+        print(raw_text_output)
 
-    if language_input and st.button('Translate further'):
-        response = client.chat.completions.create(
-            model="gpt-4-0125-preview",
-            messages=[
-                {"role": "system", "content": "You are a universal translator."},
-                {"role": "user", "content": f"Translate into {language_input}: {st.session_state['text_output']}"}
-            ]
-        )
-        
-        text_to_voice = response.choices[0].message.content
-        st.text_area("Translated Text Output", value=text_to_voice, height=300)
-        
-        answer = client.audio.speech.create(
-            model="tts-1",
-            voice="alloy",
-            input=text_to_voice,
-        )
-        answer.stream_to_file("translated_audio.mp3")
+        processed_output = tooling1.process_text_from_streamlit(st.session_state['text_output'])
 
-        # Play the synthesized audio
-        st.audio("translated_audio.mp3", format='audio/mp3', start_time=0)
+        # Display the processed output in Streamlit
+        st.text_area("Processed Output", value=processed_output, height=300)
+

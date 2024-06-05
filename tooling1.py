@@ -1,20 +1,13 @@
-from langchain import hub
-from langchain.agents import AgentExecutor, create_json_chat_agent
-from langchain_community.tools.tavily_search import TavilySearchResults
-from typing import Optional
-from langchain.chains.openai_functions import (
-    create_openai_fn_chain, create_structured_output_chain)
-from langchain.chat_models import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
-from langchain.schema import HumanMessage, SystemMessage
-from pydantic import BaseModel, Field
-from langchain.chat_models import ChatOpenAI
-from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
 from langchain.agents import AgentExecutor
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.tools.render import format_tool_to_openai_function
-from langchain.agents.format_scratchpad import format_to_openai_function_messages
 from langchain.tools import StructuredTool
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.tools.render import format_tool_to_openai_function 
+from langchain.agents.format_scratchpad import format_to_openai_function_messages
+from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
+from typing import Dict, List, Optional
+from pydantic import BaseModel, Field
+import json
 
 class ClientDetails(BaseModel):
     """
@@ -22,23 +15,24 @@ class ClientDetails(BaseModel):
     """
     name: str = Field(description="Name of the person")
     age: str = Field(description="Age of the person")
-    location: str = Field(description="Place where the person is located")
+    birthplace: str = Field(description="Place where the person was born")
+    sex: str = Field(description="Describes patient's gender")
 
-class CarDetails(BaseModel):
+class DeseaseHistory(BaseModel):
     """
     Pydantic arguments for car details
     """
-    oem: str = Field(description="car manufacturer name e.g. BMW, Mercedes")
-    model: str = Field(description="model details e.g. BMW 523")
-    year: str = Field(description="Year when the car was manufactured")
+    history: str = Field(description="Describes previous conditions") 
+    issue: str = Field(description="Describes the issue") 
+    condition: str = Field(description="Describes the current patients condition") 
 
-def get_client_details(name: str, age: str, location: str) -> str:
-    response = ClientDetails(name=name, age=age, location=location)
+def get_client_details(name: str, age: str, birthplace: str, sex: str) -> str:
+    response = ClientDetails(name=name, age=age, birthplace=birthplace, sex=sex)
     
     return response.json()
 
-def get_car_details(oem: str, model: str, year: str) -> str:
-    response = CarDetails(oem=oem, model=model, year=year)
+def get_desease_details(history: str, issue: str, condition: str) -> str:
+    response = DeseaseHistory(history=history, issue=issue, condition=condition)
     
     return response.json()
 
@@ -46,18 +40,18 @@ def get_car_details(oem: str, model: str, year: str) -> str:
 def process_text_from_streamlit(text_output: str) -> str:
     llm = ChatOpenAI(
         temperature=0,
-        model_name="gpt-4-0125-preview",
-        response_format={"type": "json_object"}
+        model_name="gpt-4o",
+        response_format={"type": "json_object"} #odd bug, resolves below via prompt
     )
 
     tools = [
         StructuredTool.from_function(func=get_client_details, args_schema=ClientDetails, description="Function to get person details"),
-        StructuredTool.from_function(func=get_car_details, args_schema=CarDetails, description="Function to get car details")
+        StructuredTool.from_function(func=get_desease_details, args_schema=DeseaseHistory, description="Function to get desease details")
     ]
     llm_with_tools = llm.bind(functions=[format_tool_to_openai_function(t) for t in tools])
-
-    system_init_prompt = "You are an expert in getting information about people"
-    user_init_prompt = f"Find all details about the person and their car and return the output in json this is the detailed text description: {text_output}"
+# in any of the prompt you have to specify that response should be in json!!! otherwise you will get an error
+    system_init_prompt = "You are a doctor handling the records of your patient"
+    user_init_prompt = f"Record all details about the person, their syndroms and history of the desease and return them in json format: {text_output}" 
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", system_init_prompt),

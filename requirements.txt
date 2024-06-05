@@ -1,5 +1,7 @@
-streamlit
-streamlit_mic_recorder
+streamlit==1.32.0
 openai
 langchain
-pydantic==1.10.12
+langchain-openai
+langchain-community                    
+langchain-core  
+
