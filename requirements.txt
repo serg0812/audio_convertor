@@ -6,4 +6,5 @@ langchain-openai
 langchain-community                    
 langchain-core  
 matplotlib
+pydantic==1.10.12
 
