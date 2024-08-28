@@ -53,6 +53,8 @@ def process_text_from_streamlit(text_output: str) -> str:
     system_init_prompt = "You are a doctor handling the records of your patient"
     user_init_prompt = f"""Record all details about the person, their syndroms and history of the desease and return them in json format. 
     Return only the data relevant to tools, skip the rest.
+    In case there is no data relevant to your task in the provided details, you MUST leave the fields blank
+    Do not create the content which is not given to you, follow the data provided below
     Here is your data: {text_output}""" 
 
     prompt = ChatPromptTemplate.from_messages([
