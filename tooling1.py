@@ -13,6 +13,7 @@ def get_client_details(text):
     history: str = Field(description="Describes previous conditions") 
     issue: str = Field(description="Describes the issue") 
     condition: str = Field(description="Describes the current patients condition") 
+    You should return it in a json format
     The format the data should be returned in is the following, example
     [
     Name: John Doe,
