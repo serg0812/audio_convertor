@@ -31,7 +31,7 @@ if option == 'Upload Audio File':
         text_output = convert_voice_to_text(audio_file)  # Convert audio file to text
         st.session_state['text_output'] = text_output  # Store text output in session state for later use
 
-        processed_output = tooling1.get_client_details(st.session_state['text_output'])
+        processed_output = tooling1.process_text_from_streamlit(st.session_state['text_output'])
 
         # Display the processed output in Streamlit
         st.text_area("Processed Output", value=processed_output, height=300)
@@ -50,7 +50,7 @@ elif option == 'Record Audio':
                 text_output = convert_voice_to_text(f)  # Convert recorded audio file to text
                 st.session_state['text_output'] = text_output  # Store text output in session state for later use
 
-                processed_output = tooling1.get_client_details(st.session_state['text_output'])
+                processed_output = tooling1.process_text_from_streamlit(st.session_state['text_output'])
                 
                 # Display the processed output in Streamlit
                 st.text_area("Processed Output", value=processed_output, height=300)
@@ -63,7 +63,7 @@ elif option == 'Upload handwritten document':
         st.session_state['text_output'] = raw_text_output  # Store raw text output in session state for later use
         print(raw_text_output)
 
-        processed_output = tooling1.get_client_details(st.session_state['text_output'])
+        processed_output = tooling1.process_text_from_streamlit(st.session_state['text_output'])
 
         # Display the processed output in Streamlit
         st.text_area("Processed Output", value=processed_output, height=300)
