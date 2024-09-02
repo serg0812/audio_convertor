@@ -5,7 +5,6 @@ from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.tools.render import format_tool_to_openai_function 
 from langchain.agents.format_scratchpad import format_to_openai_function_messages
 from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
-from langchain.core.utils import function_calling
 from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 import json
@@ -46,11 +45,10 @@ def process_text_from_streamlit(text_output: str) -> str:
     )
 
     tools = [
-        StructuredTool.from_function(func=get_client_details, args_schema=ClientDetails, description="Function to get person details"),
-        StructuredTool.from_function(func=get_desease_details, args_schema=DeseaseHistory, description="Function to get desease details")
+        StructuredTool.from_function(func=get_client_details, args_schema=ClientDetails, description="Function to get person details")
     ]
-    llm_with_tools = llm.bind(functions=[function_calling.convert_to_openai_function(t) for t in tools])
-#    llm_with_tools = llm.bind(functions=[format_tool_to_openai_function(t) for t in tools])
+#    llm_with_tools = llm.bind(functions=[function_calling.convert_to_openai_function(t) for t in tools])
+    llm_with_tools = llm.bind(functions=[format_tool_to_openai_function(t) for t in tools])
 # in any of the prompt you have to specify that response should be in json!!! otherwise you will get an error
     system_init_prompt = "You are a doctor handling the records of your patient"
     user_init_prompt = f"""Record all details about the person, their syndroms and history of the desease and return them in json format. 
